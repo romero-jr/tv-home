@@ -60,13 +60,16 @@ public class MainActivity extends Activity {
     static class App {
         String label;
         ComponentName component;
+        String launchCategory;
         Drawable banner;
         Drawable icon;
     }
 
+    private final List<App> allApps = new ArrayList<>();
     private final List<App> apps = new ArrayList<>();
     private final List<App> hiddenApps = new ArrayList<>();
     private final ExecutorService bg = Executors.newSingleThreadExecutor();
+    private final ExecutorService appLoader = Executors.newSingleThreadExecutor();
     private final Handler ui = new Handler(Looper.getMainLooper());
 
     private SharedPreferences prefs;
@@ -81,6 +84,8 @@ public class MainActivity extends Activity {
     private final View[] forecastDays = new View[5];
     private View selectedTile;
     private boolean appsShown;
+    private boolean appsDirty = true;
+    private boolean appsLoading;
 
     private final Runnable weatherTick = new Runnable() {
         @Override
@@ -93,6 +98,7 @@ public class MainActivity extends Activity {
     private final BroadcastReceiver packagesChanged = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            appsDirty = true;
             loadApps();
         }
     };
@@ -151,6 +157,7 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         loadApps();
+        showCachedWeather();
         ui.post(weatherTick);
     }
 
@@ -163,6 +170,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         unregisterReceiver(packagesChanged);
+        appLoader.shutdownNow();
         bg.shutdownNow();
         super.onDestroy();
     }
@@ -186,52 +194,96 @@ public class MainActivity extends Activity {
     // ── Apps ──
 
     private void loadApps() {
-        bg.execute(() -> {
-            PackageManager pm = getPackageManager();
-            Set<String> hidden = prefs.getStringSet("hidden", Collections.emptySet());
-            // TV (leanback) entry points first, so they win over phone-style ones from the same app.
-            Map<String, ResolveInfo> byPackage = new LinkedHashMap<>();
-            for (String category : new String[]{Intent.CATEGORY_LEANBACK_LAUNCHER, Intent.CATEGORY_LAUNCHER}) {
-                Intent intent = new Intent(Intent.ACTION_MAIN).addCategory(category);
-                for (ResolveInfo ri : pm.queryIntentActivities(intent, 0)) {
-                    String pkg = ri.activityInfo.packageName;
-                    if (!pkg.equals(getPackageName()) && !byPackage.containsKey(pkg)) byPackage.put(pkg, ri);
-                }
+        if (!appsDirty || appsLoading) return;
+        appsDirty = false;
+        appsLoading = true;
+        appLoader.execute(() -> {
+            try {
+                List<App> loaded = queryApps();
+                ui.post(() -> {
+                    if (isDestroyed()) return;
+                    appsLoading = false;
+                    allApps.clear();
+                    allApps.addAll(loaded);
+                    applyAppVisibility();
+                    loadApps();
+                });
+            } catch (RuntimeException error) {
+                ui.post(() -> {
+                    if (isDestroyed()) return;
+                    appsLoading = false;
+                    appsDirty = true;
+                    if (apps.isEmpty()) Toast.makeText(this, "Couldn't load apps", Toast.LENGTH_SHORT).show();
+                });
             }
-
-            List<App> visible = new ArrayList<>();
-            List<App> hid = new ArrayList<>();
-            for (ResolveInfo ri : byPackage.values()) {
-                App app = new App();
-                app.label = ri.loadLabel(pm).toString();
-                app.component = new ComponentName(ri.activityInfo.packageName, ri.activityInfo.name);
-                app.banner = ri.activityInfo.loadBanner(pm);
-                if (app.banner == null) app.banner = ri.activityInfo.applicationInfo.loadBanner(pm);
-                if (app.banner == null) app.icon = ri.loadIcon(pm);
-                (hidden.contains(app.component.getPackageName()) ? hid : visible).add(app);
-            }
-            Collator collator = Collator.getInstance();
-            Collections.sort(visible, (a, b) -> collator.compare(a.label, b.label));
-            Collections.sort(hid, (a, b) -> collator.compare(a.label, b.label));
-
-            ui.post(() -> {
-                apps.clear();
-                apps.addAll(visible);
-                hiddenApps.clear();
-                hiddenApps.addAll(hid);
-                adapter.notifyDataSetChanged();
-                // The grid can't take focus while it's empty, so claim it once apps arrive.
-                if (!appsShown && !apps.isEmpty()) {
-                    appsShown = true;
-                    grid.requestFocus();
-                    grid.setSelection(0);
-                }
-            });
         });
+    }
+
+    private List<App> queryApps() {
+        PackageManager pm = getPackageManager();
+        Map<String, ResolveInfo> byPackage = new LinkedHashMap<>();
+        Map<String, String> categories = new LinkedHashMap<>();
+        for (String category : new String[]{Intent.CATEGORY_LEANBACK_LAUNCHER, Intent.CATEGORY_LAUNCHER}) {
+            Intent intent = new Intent(Intent.ACTION_MAIN).addCategory(category);
+            for (ResolveInfo ri : pm.queryIntentActivities(intent, 0)) {
+                String pkg = ri.activityInfo.packageName;
+                if (!pkg.equals(getPackageName()) && !byPackage.containsKey(pkg)) {
+                    byPackage.put(pkg, ri);
+                    categories.put(pkg, category);
+                }
+            }
+        }
+        List<App> loaded = new ArrayList<>();
+        for (ResolveInfo ri : byPackage.values()) {
+            App app = new App();
+            app.label = ri.loadLabel(pm).toString();
+            app.component = new ComponentName(ri.activityInfo.packageName, ri.activityInfo.name);
+            app.launchCategory = categories.get(ri.activityInfo.packageName);
+            app.banner = ri.activityInfo.loadBanner(pm);
+            if (app.banner == null) app.banner = ri.activityInfo.applicationInfo.loadBanner(pm);
+            if (app.banner == null) app.icon = ri.loadIcon(pm);
+            loaded.add(app);
+        }
+        Collator collator = Collator.getInstance();
+        Collections.sort(loaded, (first, second) -> collator.compare(first.label, second.label));
+        return loaded;
+    }
+
+    private void applyAppVisibility() {
+        int previousPosition = grid.getSelectedItemPosition();
+        ComponentName previous = previousPosition >= 0 && previousPosition < apps.size()
+                ? apps.get(previousPosition).component : null;
+        Set<String> hidden = prefs.getStringSet("hidden", Collections.emptySet());
+        apps.clear();
+        hiddenApps.clear();
+        for (App app : allApps) {
+            (hidden.contains(app.component.getPackageName()) ? hiddenApps : apps).add(app);
+        }
+        highlight(null);
+        adapter.notifyDataSetChanged();
+        if (apps.isEmpty()) {
+            appsShown = false;
+            return;
+        }
+        if (!appsShown) {
+            appsShown = true;
+            grid.requestFocus();
+            grid.setSelection(0);
+            return;
+        }
+        int position = Math.max(0, Math.min(previousPosition, apps.size() - 1));
+        for (int index = 0; index < apps.size(); index++) {
+            if (apps.get(index).component.equals(previous)) {
+                position = index;
+                break;
+            }
+        }
+        grid.setSelection(position);
     }
 
     private void launch(App app) {
         Intent intent = new Intent(Intent.ACTION_MAIN)
+                .addCategory(app.launchCategory)
                 .setComponent(app.component)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
         try {
@@ -246,7 +298,7 @@ public class MainActivity extends Activity {
         if (hide) hidden.add(pkg);
         else hidden.remove(pkg);
         prefs.edit().putStringSet("hidden", hidden).apply();
-        loadApps();
+        applyAppVisibility();
     }
 
     private void showAppOptions(App app) {
@@ -261,17 +313,31 @@ public class MainActivity extends Activity {
                 .show();
     }
 
-    // Tiles have no border: the focused one grows and the others dim.
     private void highlight(View tile) {
+        if (selectedTile == tile) return;
+        View previous = selectedTile;
         selectedTile = tile;
-        for (int i = 0; i < grid.getChildCount(); i++) {
-            View child = grid.getChildAt(i);
-            boolean focused = child == tile;
-            child.animate()
-                    .scaleX(focused ? FOCUS_SCALE : 1f)
-                    .scaleY(focused ? FOCUS_SCALE : 1f)
-                    .setDuration(150)
-                    .start();
+        if (previous != null) {
+            previous.animate().cancel();
+            previous.animate().scaleX(1f).scaleY(1f).setDuration(100).start();
+        }
+        if (tile != null) {
+            tile.animate().cancel();
+            tile.animate().scaleX(FOCUS_SCALE).scaleY(FOCUS_SCALE).setDuration(100).start();
+        }
+    }
+
+    private static class TileHolder {
+        final ImageView banner;
+        final View iconGroup;
+        final ImageView icon;
+        final TextView label;
+
+        TileHolder(View view) {
+            banner = view.findViewById(R.id.banner);
+            iconGroup = view.findViewById(R.id.icon_group);
+            icon = view.findViewById(R.id.icon);
+            label = view.findViewById(R.id.label);
         }
     }
 
@@ -296,25 +362,30 @@ public class MainActivity extends Activity {
             if (view == null) {
                 view = LayoutInflater.from(MainActivity.this).inflate(R.layout.tile, parent, false);
                 view.setClipToOutline(true); // round the banner corners to match the tile
+                view.setTag(new TileHolder(view));
             }
             App app = apps.get(pos);
-            ImageView banner = view.findViewById(R.id.banner);
-            View iconGroup = view.findViewById(R.id.icon_group);
+            view.setContentDescription(app.label);
+            TileHolder holder = (TileHolder) view.getTag();
             if (app.banner != null) {
-                banner.setImageDrawable(app.banner);
-                banner.setVisibility(View.VISIBLE);
-                iconGroup.setVisibility(View.GONE);
+                holder.banner.setImageDrawable(app.banner);
+                holder.banner.setVisibility(View.VISIBLE);
+                holder.icon.setImageDrawable(null);
+                holder.iconGroup.setVisibility(View.GONE);
             } else {
-                ((ImageView) view.findViewById(R.id.icon)).setImageDrawable(app.icon);
-                ((TextView) view.findViewById(R.id.label)).setText(app.label);
-                banner.setVisibility(View.GONE);
-                iconGroup.setVisibility(View.VISIBLE);
+                holder.icon.setImageDrawable(app.icon);
+                holder.label.setText(app.label);
+                holder.banner.setImageDrawable(null);
+                holder.banner.setVisibility(View.GONE);
+                holder.iconGroup.setVisibility(View.VISIBLE);
             }
             // Recycled views may still carry the focus highlight.
             boolean selected = grid.hasFocus() && pos == grid.getSelectedItemPosition();
+            view.animate().cancel();
             view.setScaleX(selected ? FOCUS_SCALE : 1f);
             view.setScaleY(selected ? FOCUS_SCALE : 1f);
             if (selected) selectedTile = view;
+            else if (selectedTile == view) selectedTile = null;
             return view;
         }
     }

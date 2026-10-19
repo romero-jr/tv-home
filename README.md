@@ -7,7 +7,7 @@ A minimal launcher for Android TV boxes: clock, date, weather, and your installe
 The [visual identity](art/IDENTITY.md) echoes the launcher's three-card layout in charcoal, warm white, and muted red. Editable artwork and PNG exports are in `art/`.
 
 - **Weather** from [Open-Meteo](https://open-meteo.com) (no API key). Location is detected from your IP via ipapi.co, or set a city in Settings. The clock and weather cards use translucent charcoal panels over `background_art.png`.
-- **Apps** show their TV banner when they have one, otherwise icon + name. The list refreshes when apps are installed or removed.
+- **Apps** show their TV banner when they have one, otherwise icon + name. App artwork is cached in memory while the launcher stays alive, with refreshes on package changes rather than every return home. App loading runs separately from weather requests. Tiles reuse their child views and only animate the previous and current selection.
 - **Hold OK** or press **Menu** on an app to hide it or open App info (uninstall).
 - **Gear button** (top right): weather city, °F/°C, hidden apps, Android settings.
 
