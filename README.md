@@ -1,6 +1,10 @@
 # TV Home
 
+![TV Home — Your space. On screen.](art/tv-home-banner.png)
+
 A minimal launcher for Android TV boxes: clock, date, weather, and your installed apps. Nothing else.
+
+The [visual identity](art/IDENTITY.md) echoes the launcher's three-card layout in charcoal, warm white, and muted red. Editable artwork and PNG exports are in `art/`.
 
 - **Weather** from [Open-Meteo](https://open-meteo.com) (no API key). Location is detected from your IP via ipapi.co, or set a city in Settings. The clock and weather cards use translucent charcoal panels over `background_art.png`.
 - **Apps** show their TV banner when they have one, otherwise icon + name. The list refreshes when apps are installed or removed.
@@ -28,7 +32,7 @@ adb shell cmd package set-home-activity com.tvhome.launcher/com.tvhome.launcher.
 
 ## Clock and weather screen saver
 
-TV Home includes a full-screen Android Dream with clock, current weather, and a five-day forecast. It uses the launcher's weather settings and cached forecast, refreshes while active, and slowly shifts the cards to reduce image retention. Select it in the TV's screen saver settings, or over ADB:
+TV Home includes a full-screen Android Dream with clock, current weather, and a five-day forecast. The screen fades in while the cards gently zoom into place and the wallpaper dims, with a short fade on exit. It uses the launcher's weather settings and cached forecast, refreshes while active, and slowly shifts the cards to reduce image retention. Select it in the TV's screen saver settings, or over ADB:
 
 ```bash
 adb shell settings put secure screensaver_components com.tvhome.launcher/com.tvhome.launcher.AmbientDreamService

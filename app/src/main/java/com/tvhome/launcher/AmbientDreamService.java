@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.service.dreams.DreamService;
 import android.view.View;
+import android.view.animation.PathInterpolator;
 import android.widget.TextView;
 
 import org.json.JSONArray;
@@ -24,6 +25,7 @@ public class AmbientDreamService extends DreamService {
     private ExecutorService background;
     private SharedPreferences prefs;
     private View cards;
+    private View shade;
     private final View[] forecastDays = new View[5];
 
     private final Runnable refreshTick = new Runnable() {
@@ -55,7 +57,13 @@ public class AmbientDreamService extends DreamService {
         setFullscreen(true);
         setScreenBright(false);
         setContentView(R.layout.ambient_dream);
+        getWindow().setWindowAnimations(R.style.AmbientWindowAnimation);
         cards = findViewById(R.id.ambient_cards);
+        shade = findViewById(R.id.ambient_shade);
+        cards.setAlpha(0f);
+        cards.setScaleX(0.975f);
+        cards.setScaleY(0.975f);
+        shade.setAlpha(0f);
         forecastDays[0] = findViewById(R.id.ambient_day1);
         forecastDays[1] = findViewById(R.id.ambient_day2);
         forecastDays[2] = findViewById(R.id.ambient_day3);
@@ -70,7 +78,11 @@ public class AmbientDreamService extends DreamService {
     public void onDreamingStarted() {
         super.onDreamingStarted();
         handler.post(refreshTick);
-        handler.post(moveTick);
+        PathInterpolator easing = new PathInterpolator(0.2f, 0f, 0f, 1f);
+        cards.animate().alpha(1f).scaleX(1f).scaleY(1f)
+                .setDuration(1200).setInterpolator(easing).start();
+        shade.animate().alpha(1f).setDuration(1400).setInterpolator(easing).start();
+        handler.postDelayed(moveTick, 60_000);
     }
 
     @Override
@@ -78,6 +90,7 @@ public class AmbientDreamService extends DreamService {
         handler.removeCallbacks(refreshTick);
         handler.removeCallbacks(moveTick);
         cards.animate().cancel();
+        shade.animate().cancel();
         super.onDreamingStopped();
     }
 

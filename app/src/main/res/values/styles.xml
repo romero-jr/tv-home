@@ -5,6 +5,11 @@
         <item name="android:colorAccent">#FFFFFF</item>
     </style>
 
+    <style name="AmbientWindowAnimation">
+        <item name="android:windowEnterAnimation">@anim/ambient_enter</item>
+        <item name="android:windowExitAnimation">@anim/ambient_exit</item>
+    </style>
+
     <!-- Small spaced-out caps used for card titles, e.g. "CURRENT WEATHER" -->
     <style name="CardLabel">
         <item name="android:layout_width">wrap_content</item>

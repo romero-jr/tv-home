@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <defs>
+    <linearGradient id="surface" x2="1" y2="1">
+      <stop stop-color="#272427"/>
+      <stop offset="1" stop-color="#101012"/>
+    </linearGradient>
+    <radialGradient id="ember" cx="0" cy="1" r="1">
+      <stop stop-color="#A84E55" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#A84E55" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <path fill="url(#surface)" d="M0 0h1280v720H0z"/>
+  <path fill="url(#ember)" d="M0 0h1280v720H0z"/>
+  <g transform="translate(190 188) scale(1.25)">
+    <rect x="30" y="46" width="196" height="146" rx="28" fill="none" stroke="#F4F1ED" stroke-width="10"/>
+    <rect x="54" y="70" width="60" height="98" rx="12" fill="#F4F1ED"/>
+    <rect x="128" y="70" width="74" height="42" rx="10" fill="#A6A3A5"/>
+    <rect x="128" y="126" width="74" height="42" rx="10" fill="#A84E55"/>
+    <path d="M106 214h44" fill="none" stroke="#F4F1ED" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  <text x="560" y="387" font-family="Arial, sans-serif" font-size="108" font-weight="700" letter-spacing="-5" fill="#F4F1ED">TV Home</text>
+  <text x="566" y="437" font-family="Arial, sans-serif" font-size="23" letter-spacing="4" fill="#A6A3A5">YOUR SPACE. ON SCREEN.</text>
+</svg>

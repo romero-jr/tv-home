@@ -5,6 +5,7 @@
     android:background="@drawable/bg">
 
     <View
+        android:id="@+id/ambient_shade"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#66000000" />
