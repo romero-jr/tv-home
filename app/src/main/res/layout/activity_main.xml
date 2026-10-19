@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Skyline-style layout: big clock card on the left, weather cards and apps on the right.
+     The outer padding keeps everything inside the TV overscan safe area. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipChildren="false"
+    android:orientation="horizontal"
+    android:padding="32dp">
+
+    <!-- Clock -->
+    <LinearLayout
+        android:id="@+id/clock_card"
+        android:layout_width="290dp"
+        android:layout_height="match_parent"
+        android:background="@drawable/card_large"
+        android:gravity="bottom"
+        android:orientation="vertical"
+        android:paddingLeft="36dp"
+        android:paddingRight="24dp"
+        android:paddingBottom="30dp">
+
+        <TextClock
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-light"
+            android:format12Hour="hh"
+            android:format24Hour="HH"
+            android:includeFontPadding="false"
+            android:letterSpacing="-0.02"
+            android:textColor="#FFFFFF"
+            android:textSize="140sp" />
+
+        <TextClock
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-6dp"
+            android:fontFamily="sans-serif-light"
+            android:format12Hour="mm"
+            android:format24Hour="mm"
+            android:includeFontPadding="false"
+            android:letterSpacing="-0.02"
+            android:textColor="#909090"
+            android:textSize="140sp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:baselineAligned="true"
+            android:orientation="horizontal">
+
+            <TextClock
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:format12Hour="EEEE"
+                android:format24Hour="EEEE"
+                android:letterSpacing="0.18"
+                android:textAllCaps="true"
+                android:textColor="#9A9A9A"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextClock
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="14dp"
+                android:format12Hour="MMM d, yyyy"
+                android:format24Hour="MMM d, yyyy"
+                android:textColor="#999999"
+                android:textSize="13sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="16dp"
+        android:layout_weight="1"
+        android:clipChildren="false"
+        android:orientation="vertical">
+
+        <!-- Weather cards -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="132dp"
+            android:orientation="horizontal">
+
+            <RelativeLayout
+                android:id="@+id/weather_card"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/card"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/weather_label"
+                    style="@style/CardLabel"
+                    android:text="Current weather" />
+
+                <TextView
+                    android:id="@+id/weather_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
+                    android:textSize="30sp" />
+
+                <TextView
+                    android:id="@+id/weather_temp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/weather_label"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="sans-serif-light"
+                    android:includeFontPadding="false"
+                    android:text="--"
+                    android:textColor="#FFFFFF"
+                    android:textSize="48sp" />
+
+                <TextView
+                    android:id="@+id/weather_unit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@id/weather_temp"
+                    android:layout_toRightOf="@id/weather_temp"
+                    android:layout_marginLeft="2dp"
+                    android:textColor="#999999"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/weather_condition"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:text="Loading…"
+                    android:textColor="#9A9A9A"
+                    android:textSize="13sp" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentBottom="true"
+                    android:gravity="end"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/weather_feels"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#9A9A9A"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/weather_place"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:textColor="#E6E6E6"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/forecast_card"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="12dp"
+                android:layout_weight="1.35"
+                android:background="@drawable/card"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView style="@style/CardLabel" android:text="5-day forecast" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <include android:id="@+id/day1" layout="@layout/forecast_day"
+                        android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" />
+                    <View style="@style/ForecastDivider" />
+                    <include android:id="@+id/day2" layout="@layout/forecast_day"
+                        android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" />
+                    <View style="@style/ForecastDivider" />
+                    <include android:id="@+id/day3" layout="@layout/forecast_day"
+                        android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" />
+                    <View style="@style/ForecastDivider" />
+                    <include android:id="@+id/day4" layout="@layout/forecast_day"
+                        android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" />
+                    <View style="@style/ForecastDivider" />
+                    <include android:id="@+id/day5" layout="@layout/forecast_day"
+                        android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Apps -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="4dp">
+
+            <TextView
+                style="@style/CardLabel"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:text="Apps" />
+
+            <TextView
+                android:id="@+id/settings"
+                style="@style/CardLabel"
+                android:background="@drawable/text_button_bg"
+                android:focusable="true"
+                android:nextFocusDown="@+id/apps"
+                android:paddingLeft="10dp"
+                android:paddingTop="6dp"
+                android:paddingRight="10dp"
+                android:paddingBottom="6dp"
+                android:text="Settings" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="8dp"
+            android:layout_weight="1"
+            android:clipChildren="true"
+            android:clipToPadding="true">
+
+            <GridView
+                android:id="@+id/apps"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:fadingEdgeLength="48dp"
+                android:horizontalSpacing="14dp"
+                android:listSelector="@android:color/transparent"
+                android:numColumns="4"
+                android:padding="8dp"
+                android:requiresFadingEdge="vertical"
+                android:scrollbars="none"
+                android:stretchMode="columnWidth"
+                android:verticalSpacing="14dp" />
+        </FrameLayout>
+    </LinearLayout>
+</LinearLayout>

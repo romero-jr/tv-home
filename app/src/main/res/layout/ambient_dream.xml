@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#66000000" />
+
+    <LinearLayout
+        android:id="@+id/ambient_cards"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:padding="48dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/card_large"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextClock
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:format12Hour="h:mm"
+                android:format24Hour="HH:mm"
+                android:includeFontPadding="false"
+                android:textColor="#FFFFFF"
+                android:textSize="100sp" />
+
+            <TextClock
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:format12Hour="EEEE, MMMM d"
+                android:format24Hour="EEEE, MMMM d"
+                android:textColor="#A6A6A6"
+                android:textSize="22sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="20dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/card_large"
+                android:gravity="center_vertical"
+                android:orientation="vertical"
+                android:padding="36dp">
+
+                <TextView
+                    style="@style/CardLabel"
+                    android:text="Current weather"
+                    android:textSize="14sp" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/ambient_temp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-light"
+                        android:text="--"
+                        android:textColor="#FFFFFF"
+                        android:textSize="82sp" />
+
+                    <TextView
+                        android:id="@+id/ambient_unit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#A6A6A6"
+                        android:textSize="26sp" />
+
+                    <TextView
+                        android:id="@+id/ambient_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="24dp"
+                        android:textSize="48sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/ambient_condition"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Loading weather…"
+                    android:textColor="#E6E6E6"
+                    android:textSize="22sp" />
+
+                <TextView
+                    android:id="@+id/ambient_place"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:textColor="#9A9A9A"
+                    android:textSize="17sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="20dp"
+                android:layout_weight="0.58"
+                android:background="@drawable/card_large"
+                android:orientation="vertical"
+                android:padding="28dp">
+
+                <TextView
+                    style="@style/CardLabel"
+                    android:text="5-day forecast"
+                    android:textSize="13sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="18dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <include android:id="@+id/ambient_day1" layout="@layout/forecast_day"
+                        android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" />
+                    <include android:id="@+id/ambient_day2" layout="@layout/forecast_day"
+                        android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" />
+                    <include android:id="@+id/ambient_day3" layout="@layout/forecast_day"
+                        android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" />
+                    <include android:id="@+id/ambient_day4" layout="@layout/forecast_day"
+                        android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" />
+                    <include android:id="@+id/ambient_day5" layout="@layout/forecast_day"
+                        android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

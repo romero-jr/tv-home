@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_key_service_label">TV Home remote buttons</string>
+    <string name="remote_key_service_description">Makes the remote\'s Settings button open Android Settings.</string>
+</resources>
